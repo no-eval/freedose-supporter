@@ -2,6 +2,8 @@ import { Head } from "components/head";
 import { Fragment, useEffect } from "react";
 import { getProviders, signIn, useSession, signOut } from "next-auth/client";
 import toast, { Toaster } from "react-hot-toast";
+import { getSession } from "next-auth/client";
+import { PrismaClient } from "@prisma/client";
 
 function Infobar(params) {
   return (
@@ -108,8 +110,41 @@ export default function Home({ providers }) {
   );
 }
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps({ req, res }, context) {
+  const session = await getSession({ req });
+  const prisma = new PrismaClient();
   const providers = await getProviders();
+
+  const email = session?.user?.email;
+
+  if (email != null || undefined) {
+    const supporter = await prisma.supporter.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    const userExists = supporter != null || undefined ? true : false;
+
+    if (userExists) {
+      return {
+        redirect: {
+          destination: "/home",
+          permanent: false,
+        },
+      };
+    }
+
+    if (!userExists) {
+      return {
+        redirect: {
+          destination: "/setup",
+          permanent: false,
+        },
+      };
+    }
+  }
+
   return {
     props: { providers },
   };
