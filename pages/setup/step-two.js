@@ -49,7 +49,7 @@ export default function SetupStepTwo(params) {
       <Toaster />
       <div>
         {!useCamera ? (
-          <div className="flex-grow h-screen">
+          <div className="flex-grow w-auto h-auto">
             <Fragment>
               <StepHead title="Selfie" />
             </Fragment>
@@ -71,13 +71,13 @@ export default function SetupStepTwo(params) {
             </div>
             <div className="absolute inset-x-0 bottom-0 flex flex-wrap px-8 pb-8">
               <button
-                type="submit"
-                className="flex items-center justify-center w-1/2 max-w-xs py-3 mx-auto text-base font-medium text-gray-700 bg-white border border-transparent rounded-md hover:bg-gray-100 md:py-4 md:text-lg md:px-10"
+                onClick={() => router.push("/setup/step-three")}
+                className="flex items-center justify-center w-1/2 max-w-xs py-3 mx-auto text-base font-medium text-gray-700 md:py-4 md:text-lg md:px-10"
               >
                 <p className="px-2">Skip for now</p>
               </button>
               <button
-                type="submit"
+                onClick={() => setUseCamera(true)}
                 className="flex items-center justify-center w-1/2 max-w-xs py-3 mx-auto text-base font-medium text-white border border-transparent rounded-md bg-primary-100 hover:bg-primary-80 md:py-4 md:text-lg md:px-10"
               >
                 <p className="px-2">Next</p>
