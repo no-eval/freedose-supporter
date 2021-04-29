@@ -12,7 +12,7 @@ import Webcam from "react-webcam";
 
 export default function SetupStepTwo(params) {
   const webcamRef = useRef(null);
-  const [useCamera, setUseCamera] = useState(true);
+  const [useCamera, setUseCamera] = useState(false);
   const [imageData, setImageData] = useState(null);
   const router = useRouter();
 
