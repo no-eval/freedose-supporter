@@ -168,23 +168,27 @@ export async function getServerSideProps({ req, res }, context) {
 
     console.log(userExists, supporter);
 
-    if (userExists) {
-      if (supporter.selfie === null) {
-        return {
-          redirect: {
-            destination: "/setup/step-two",
-            permanent: false,
-          },
-        };
-      }
-      if (supporter.dosesPledged === 0) {
-        return {
-          redirect: {
-            destination: "/setup/step-three",
-            permanent: false,
-          },
-        };
-      }
+    if (userExists && supporter.name && supporter.dosesPledged) {
+      return {
+        redirect: {
+          destination: "/home",
+          permanent: false,
+        },
+      };
+    } else if (userExists && !supporter.selfie) {
+      return {
+        redirect: {
+          destination: "/setup/step-two",
+          permanent: false,
+        },
+      };
+    } else if (userExists && !supporter.dosesPledged) {
+      return {
+        redirect: {
+          destination: "/setup/step-three",
+          permanent: false,
+        },
+      };
     }
 
     if (!userExists) {
