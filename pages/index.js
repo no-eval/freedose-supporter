@@ -126,16 +126,14 @@ export async function getServerSideProps({ req, res }, context) {
 
     const userExists = supporter != null || undefined ? true : false;
 
-    if (userExists) {
+    if (userExists && supporter.dosesPledged) {
       return {
         redirect: {
           destination: "/home",
           permanent: false,
         },
       };
-    }
-
-    if (!userExists) {
+    } else {
       return {
         redirect: {
           destination: "/setup",

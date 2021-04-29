@@ -18,7 +18,7 @@ model Supporter {
   dosesFulfilled Int      @default(0)
   socialUrl      String?  @db.VarChar(50)
   phone          BigInt?  @db.BigInt
-  selfie         Bytes?   @db.ByteA
+  selfie         String?
   joinedAt       DateTime @db.Timestamptz
   Match          Match[]
 }
@@ -29,8 +29,8 @@ model Participant {
   phone         BigInt        @unique @db.BigInt
   pincode       Int?          @db.Integer
   birthYear     Int?          @db.Integer
-  selfie        Bytes?        @db.ByteA
-  idCard        Bytes?        @db.ByteA
+  selfie        String?
+  idCard        String?
   dosesRecieved DosesRecieved @db.enum
   paymentMode   PaymentMode?  @db.enum
   upiId         String?       @db.VarChar(20)
@@ -61,11 +61,11 @@ model Match {
   acknowledgedAt          DateTime?                 @db.Timestamptz
   matchRevoked            Boolean?                  @db.Boolean
   revokedReason           RevokedReason?            @db.enum
-  boothSelfie             Bytes?                    @db.ByteA
+  boothSelfie             String?
   selfiePrivacy           Boolean?                  @db.Boolean
   thankyouNote            String?                   @db.VarChar(255)
   status                  MatchStatus?              @db.enum
-  paymentProof            Bytes?                    @db.ByteA
+  paymentProof            String?
   paymentAmount           Int?                      @db.Integer
   VaccinationVerification VaccinationVerification[]
 }
@@ -91,8 +91,8 @@ model Vaccination {
   vaccine                 Vaccine?                  @db.enum
   vaccinatedDate          DateTime?                 @db.Date
   vaccinatedEntryDate     DateTime?                 @db.Timestamptz
-  certificate             Bytes?                    @db.ByteA
-  receipt                 Bytes?                    @db.ByteA
+  certificate             String?
+  receipt                 String?
   receiptAmount           Int?                      @db.Integer
   Match                   Match[]
   VaccinationVerification VaccinationVerification[]
@@ -135,7 +135,7 @@ model Volunteer {
   name                    String                    @db.VarChar(50)
   email                   String                    @db.VarChar(50)
   phone                   BigInt                    @db.BigInt
-  selfie                  Bytes?                    @db.ByteA
+  selfie                  String?
   isVerified              Boolean                   @db.Boolean
   joinedAt                DateTime?                 @db.Timestamptz
   VaccinationVerification VaccinationVerification[]

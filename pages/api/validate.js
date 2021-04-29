@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "next-auth/client";
-import Error from "next/error";
 import connect from "next-connect";
 import sessionValidator from "middleware/session-validator";
 
