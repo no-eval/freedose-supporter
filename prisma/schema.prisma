@@ -1,0 +1,142 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Supporter {
+  id             String   @id @db.Uuid
+  name           String   @db.VarChar(50)
+  email          String   @unique @db.VarChar(50)
+  dosesPledged   Int      @default(0)
+  dosesFulfilled Int      @default(0)
+  socialUrl      String?  @db.VarChar(50)
+  phone          BigInt?  @db.BigInt
+  selfie         String?
+  joinedAt       DateTime @db.Timestamptz
+  Match          Match[]
+}
+
+model Participant {
+  id            String        @id @db.Uuid
+  name          String?       @db.VarChar(50)
+  phone         BigInt        @unique @db.BigInt
+  pincode       Int?          @db.Integer
+  birthYear     Int?          @db.Integer
+  selfie        String?
+  idCard        String?
+  dosesRecieved DosesRecieved @db.enum
+  paymentMode   PaymentMode?  @db.enum
+  upiId         String?       @db.VarChar(20)
+  accountNumber String?       @db.VarChar(20)
+  ifsc          String?       @db.VarChar(20)
+  joinedAt      DateTime      @db.Timestamptz
+  Match         Match[]
+  Vaccination   Vaccination[]
+}
+
+enum DosesRecieved {
+  ZERO
+  ONE
+  TWO
+}
+
+enum PaymentMode {
+  UPI
+  BANK
+}
+
+model Match {
+  id                      String                    @id @db.Uuid
+  participantId           Participant               @relation(fields: [id], references: [id])
+  supporterId             Supporter                 @relation(fields: [id], references: [id])
+  vaccinationId           Vaccination               @relation(fields: [id], references: [id])
+  matchedAt               DateTime                  @db.Timestamptz
+  acknowledgedAt          DateTime?                 @db.Timestamptz
+  matchRevoked            Boolean?                  @db.Boolean
+  revokedReason           RevokedReason?            @db.enum
+  boothSelfie             String?
+  selfiePrivacy           Boolean?                  @db.Boolean
+  thankyouNote            String?                   @db.VarChar(255)
+  status                  MatchStatus?              @db.enum
+  paymentProof            String?
+  paymentAmount           Int?                      @db.Integer
+  VaccinationVerification VaccinationVerification[]
+}
+
+enum RevokedReason {
+  PARTICIPANT_DELAYED
+  SUPPORTER_DELAYED
+}
+
+enum MatchStatus {
+  PENDING_VACCINATION
+  PENDING_PAYMENT
+  REMATCHING
+  PAID
+}
+
+model Vaccination {
+  id                      String                    @id @db.Uuid
+  participantId           Participant               @relation(fields: [id], references: [id])
+  registeredAt            DateTime                  @db.Timestamptz
+  dose                    VaccinationDose           @db.enum
+  progress                VaccinationProgress       @db.enum
+  vaccine                 Vaccine?                  @db.enum
+  vaccinatedDate          DateTime?                 @db.Date
+  vaccinatedEntryDate     DateTime?                 @db.Timestamptz
+  certificate             String?
+  receipt                 String?
+  receiptAmount           Int?                      @db.Integer
+  Match                   Match[]
+  VaccinationVerification VaccinationVerification[]
+}
+
+enum VaccinationDose {
+  FIRST
+  SECOND
+}
+
+enum VaccinationProgress {
+  REGISTERED
+  VACCINATED
+}
+
+enum Vaccine {
+  COVISHIELD
+  COVAXIN
+  SPUTNIKV
+}
+
+model VaccinationVerification {
+  id             String             @id @db.Uuid
+  vaccinationId  Vaccination        @relation(fields: [id], references: [id])
+  matchId        Match              @relation(fields: [id], references: [id])
+  status         VerificationStatus @db.enum
+  verifiedBy     Volunteer          @relation(fields: [id], references: [id])
+  verifiedAt     DateTime           @db.Timestamptz
+  rejectedReason String?            @db.VarChar(255)
+  rejectedAt     DateTime?          @db.Timestamptz
+}
+
+enum VerificationStatus {
+  VERIFIED
+  REJECTED
+}
+
+model Volunteer {
+  id                      String                    @id @db.Uuid
+  name                    String                    @db.VarChar(50)
+  email                   String                    @db.VarChar(50)
+  phone                   BigInt                    @db.BigInt
+  selfie                  String?
+  isVerified              Boolean                   @db.Boolean
+  joinedAt                DateTime?                 @db.Timestamptz
+  VaccinationVerification VaccinationVerification[]
+}
