@@ -7,6 +7,27 @@ import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 import NavBar from "components/nav-bar";
 import ProgressBar from "@ramonak/react-progress-bar";
+import ReactRoundedImage from "react-rounded-image";
+
+function ParticipantLookout(params) {
+  return (
+    <Fragment>
+      <div className="p-8 bg-white rounded-md">
+        <img src="images/participant-lookout.svg" className="block mx-auto" />
+        <h1 className="py-2 text-base font-bold text-center">
+          Looking for participants
+        </h1>
+        <p className="pb-8 text-base text-center">
+          You’re all set up! We will pair you with a participant as soon as they
+          sign up.
+        </p>
+        <button className="flex items-center justify-center w-full max-w-xs p-4 py-3 mx-auto text-base font-medium border border-transparent rounded-md text-primary-100 border-primary-100 hover:bg-primary-20 md:py-4 md:text-lg md:px-10">
+          <p className="px-2">Share app</p>
+        </button>
+      </div>
+    </Fragment>
+  );
+}
 
 export default function Home(params) {
   const [session] = useSession();
@@ -28,12 +49,15 @@ export default function Home(params) {
       <Head title="Supporter / Freedose" />
       <div className="min-h-screen pb-20 text-gray-800 bg-primary-20">
         <div className="px-8 py-8">
-          <div className="flex justify-center w-full">
-            <img
-              width="96px"
-              height="96px"
-              src={supporter?.selfie || session?.user?.image}
-              className="block border-4 rounded-full border-primary-60"
+          <div className="flex justify-center">
+            <ReactRoundedImage
+              image={supporter?.selfie || session?.user?.image}
+              roundedColor="#B8B8FF"
+              hoverColor="#6666FF"
+              imageWidth="96"
+              imageHeight="96"
+              roundedSize="13"
+              borderRadius="70"
             />
           </div>
           <div className="py-4">
@@ -58,19 +82,8 @@ export default function Home(params) {
             </div>
           </div>
         </div>
-        <div className="p-8 bg-white rounded-md">
-          <img src="images/participant-lookout.svg" className="block mx-auto" />
-          <h1 className="py-2 text-base font-bold text-center">
-            Looking for participants
-          </h1>
-          <p className="pb-8 text-base text-center">
-            You’re all set up! We will pair you with a participant as soon as
-            they sign up.
-          </p>
-          <button className="flex items-center justify-center w-full max-w-xs p-4 py-3 mx-auto text-base font-medium border border-transparent rounded-md text-primary-100 border-primary-100 hover:bg-primary-20 md:py-4 md:text-lg md:px-10">
-            <p className="px-2">Share app</p>
-          </button>
-        </div>
+        {/* empty state */}
+        <ParticipantLookout />
         <NavBar currentTab="home" />
       </div>
     </Fragment>
