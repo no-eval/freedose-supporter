@@ -54,9 +54,12 @@ enum PaymentMode {
 
 model Match {
   id                      String                    @id @db.Uuid
-  participantId           Participant               @relation(fields: [id], references: [id])
-  supporterId             Supporter                 @relation(fields: [id], references: [id])
-  vaccinationId           Vaccination               @relation(fields: [id], references: [id])
+  participantId           String                    @db.Uuid
+  participant             Participant               @relation(fields: [participantId], references: [id])
+  supporterId             String                    @db.Uuid
+  supporter               Supporter                 @relation(fields: [supporterId], references: [id])
+  vaccinationId           String                    @db.Uuid
+  vaccination             Vaccination               @relation(fields: [vaccinationId], references: [id])
   matchedAt               DateTime                  @db.Timestamptz
   acknowledgedAt          DateTime?                 @db.Timestamptz
   matchRevoked            Boolean?                  @db.Boolean
@@ -84,7 +87,8 @@ enum MatchStatus {
 
 model Vaccination {
   id                      String                    @id @db.Uuid
-  participantId           Participant               @relation(fields: [id], references: [id])
+  participantId           String                    @db.Uuid
+  participant             Participant               @relation(fields: [participantId], references: [id])
   registeredAt            DateTime                  @db.Timestamptz
   dose                    VaccinationDose           @db.enum
   progress                VaccinationProgress       @db.enum
@@ -116,10 +120,13 @@ enum Vaccine {
 
 model VaccinationVerification {
   id             String             @id @db.Uuid
-  vaccinationId  Vaccination        @relation(fields: [id], references: [id])
-  matchId        Match              @relation(fields: [id], references: [id])
+  vaccinationId  String             @db.Uuid
+  vaccination    Vaccination        @relation(fields: [vaccinationId], references: [id])
+  matchId        String             @db.Uuid
+  match          Match              @relation(fields: [matchId], references: [id])
   status         VerificationStatus @db.enum
-  verifiedBy     Volunteer          @relation(fields: [id], references: [id])
+  verifiedById   String             @db.Uuid
+  verifiedBy     Volunteer          @relation(fields: [verifiedById], references: [id])
   verifiedAt     DateTime           @db.Timestamptz
   rejectedReason String?            @db.VarChar(255)
   rejectedAt     DateTime?          @db.Timestamptz

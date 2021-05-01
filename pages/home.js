@@ -1,29 +1,90 @@
 import { Head } from "components/head";
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { getProviders, signIn, useSession, signOut } from "next-auth/client";
 import toast, { Toaster } from "react-hot-toast";
 import { getSession } from "next-auth/client";
 import { PrismaClient } from "@prisma/client";
+import axios from "axios";
+import NavBar from "components/nav-bar";
+import ProgressBar from "@ramonak/react-progress-bar";
+import ReactRoundedImage from "react-rounded-image";
+
+function ParticipantLookout(params) {
+  return (
+    <Fragment>
+      <div className="p-8 bg-white rounded-md">
+        <img src="images/participant-lookout.svg" className="block mx-auto" />
+        <h1 className="py-2 text-base font-bold text-center">
+          Looking for participants
+        </h1>
+        <p className="pb-8 text-base text-center">
+          You’re all set up! We will pair you with a participant as soon as they
+          sign up.
+        </p>
+        <button className="flex items-center justify-center w-full max-w-xs p-4 py-3 mx-auto text-base font-medium border border-transparent rounded-md text-primary-100 border-primary-100 hover:bg-primary-20 md:py-4 md:text-lg md:px-10">
+          <p className="px-2">Share app</p>
+        </button>
+      </div>
+    </Fragment>
+  );
+}
 
 export default function Home(params) {
+  const [session] = useSession();
+  const [supporter, setSupporter] = useState(null);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const supporterDetails = axios
+      .get("/api/supporter-details")
+      .then((response) => setSupporter(response.data));
+  }, []);
+
+  useEffect(() => {
+    setProgress((supporter?.dosesFulfilled / supporter?.dosesPledged) * 100);
+  });
+
   return (
     <Fragment>
       <Head title="Supporter / Freedose" />
-      <div className="bg-white">
-        <div className="flex-row md:grid md:grid-cols-5">
-          {/* Action messages */}
-          <Toaster />
-          {/* Main App */}
-          <div className="w-full h-screen bg-primary-20 md:col-start-2 md:col-span-3">
-            <div className="flex items-center justify-center p-8">
-              <img src="freedose.svg" className="p-2" />
-              <p className="text-4xl font-bold">Freedose</p>
-            </div>
-            <img src="images/signup-one.svg" className="object-cover w-full" />
+      <div className="min-h-screen pb-20 text-gray-800 bg-primary-20">
+        <div className="px-8 py-8">
+          <div className="flex justify-center">
+            <ReactRoundedImage
+              image={supporter?.selfie || session?.user?.image}
+              roundedColor="#B8B8FF"
+              hoverColor="#6666FF"
+              imageWidth="96"
+              imageHeight="96"
+              roundedSize="13"
+              borderRadius="70"
+            />
           </div>
-          {/* Infobar @ Desktop Only */}
-          <div className="relative hidden md:container sm:block md:bg-white md:col-start-5 md:col-span-1"></div>
+          <div className="py-4">
+            <h1 className="text-2xl font-medium text-center">
+              Hey {supporter?.name}!
+            </h1>
+            <h3 className="py-2 text-base text-center">No action pending</h3>
+          </div>
+          <div className="p-4 bg-white rounded-md">
+            <p className="pb-2 text-xs text-gray-800">Pledge progress</p>
+            <ProgressBar
+              completed={progress}
+              bgColor="#6666FF"
+              baseBgColor="#E7E7E9"
+              height="8px"
+              isLabelVisible={false}
+            />
+            <div>
+              <p className="pt-2 text-xs text-primary-100">
+                {supporter?.dosesFulfilled} of {supporter?.dosesPledged} doses
+              </p>
+            </div>
+          </div>
         </div>
+        {/* empty state */}
+        <ParticipantLookout />
+        <NavBar currentTab="home" />
       </div>
     </Fragment>
   );
