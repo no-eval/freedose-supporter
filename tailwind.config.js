@@ -18,6 +18,9 @@ module.exports = {
           100: "#6666FF",
         },
       },
+      gridTemplateColumns: {
+        "auto-two": "64px 1fr",
+      },
     },
   },
   variants: {

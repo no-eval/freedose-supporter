@@ -13,6 +13,21 @@ handler.use(sessionValidator).get(async (req, res, next) => {
     where: {
       email: session.user.email,
     },
+    include: {
+      Match: {
+        include: {
+          participant: {
+            select: {
+              id: true,
+              name: true,
+              selfie: true,
+              dosesRecieved: true,
+              Vaccination: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   return res.status(200).json(details);
