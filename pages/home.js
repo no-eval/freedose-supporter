@@ -8,6 +8,7 @@ import axios from "axios";
 import NavBar from "components/nav-bar";
 import ProgressBar from "@ramonak/react-progress-bar";
 import ReactRoundedImage from "react-rounded-image";
+import { useRouter } from "next/router";
 
 function ParticipantLookout(params) {
   return (
@@ -31,6 +32,7 @@ function ParticipantLookout(params) {
 
 function ParticipantComponent(item) {
   const { match } = item;
+  const router = useRouter();
 
   const AWAITING_ACKNOWLEDGEMENT = match.acknowledgedAt === null ? true : false;
   const AWAITING_VACCINATION =
@@ -46,7 +48,10 @@ function ParticipantComponent(item) {
     match.paymentProof !== null && match.thankyouNote !== null ? true : false;
 
   return (
-    <div className="grid border-b border-gray-200 grid-cols-auto-two">
+    <div
+      onClick={() => router.push(`/participant/${match.participantId}`)}
+      className="grid border-b border-gray-200 cursor-pointer hover:bg-gray-50 grid-cols-auto-two"
+    >
       <div className="py-2">
         <ReactRoundedImage
           image={match.participant.selfie}
@@ -145,20 +150,52 @@ function ParticipantComponent(item) {
 }
 
 function ActiveParticipants({ match }) {
-  const participantList = [];
+  const activeParticipantList = [];
+  const revokedParticipantList = [];
+  const completedParticipantList = [];
 
   const matchThis = match?.forEach((item, index) => {
-    match.thankyouNote !== null
-      ? participantList.push(<ParticipantComponent match={item} key={index} />)
-      : null;
+    !item.matchRevoked
+      ? activeParticipantList.push(
+          <ParticipantComponent match={item} key={index} />
+        )
+      : item.thankyouNote
+      ? completedParticipantList.push(
+          <ParticipantComponent match={item} key={index} />
+        )
+      : revokedParticipantList.push(
+          <ParticipantComponent match={item} key={index} />
+        );
   });
 
   return (
     <Fragment>
-      <div className="p-4 pt-0 font-medium text-gray-700">
-        Active Participants
-      </div>
-      <div className="px-4 bg-white rounded-md">{participantList}</div>
+      {activeParticipantList.length !== 0 ? (
+        <Fragment>
+          <div className="p-4 pt-0 font-medium text-gray-700">
+            Active Participants
+          </div>
+          <div className="px-4 bg-white rounded-md">
+            {activeParticipantList}
+          </div>
+        </Fragment>
+      ) : null}
+      {completedParticipantList.length !== 0 ? (
+        <Fragment>
+          <div className="p-4 font-medium text-gray-700">Archive</div>
+          <div className="px-4 bg-white rounded-md">
+            {completedParticipantList}
+          </div>
+        </Fragment>
+      ) : null}
+      {revokedParticipantList.length !== 0 ? (
+        <Fragment>
+          <div className="p-4 font-medium text-gray-700">Revoked</div>
+          <div className="px-4 bg-white rounded-md">
+            {revokedParticipantList}
+          </div>
+        </Fragment>
+      ) : null}
     </Fragment>
   );
 }
