@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import sessionValidator from "middleware/session-validator";
 import connect from "next-connect";
-import { getSession } from "next-auth/client";
+import { getSession, session } from "next-auth/client";
 
 const handler = connect();
 
@@ -9,22 +9,20 @@ handler.use(sessionValidator).get(async (req, res, next) => {
   const prisma = new PrismaClient();
   const session = await getSession({ req });
 
-  const details = await prisma.supporter.findUnique({
+  const participantId = req.query.participantId[0];
+
+  const details = await prisma.participant.findUnique({
     where: {
-      email: session.user.email,
+      id: participantId,
     },
-    include: {
-      Match: {
+    select: {
+      name: true,
+      pincode: true,
+      selfie: true,
+      dosesRecieved: true,
+      Vaccination: {
         include: {
-          participant: {
-            select: {
-              id: true,
-              name: true,
-              selfie: true,
-              dosesRecieved: true,
-              Vaccination: true,
-            },
-          },
+          Match: true,
         },
       },
     },

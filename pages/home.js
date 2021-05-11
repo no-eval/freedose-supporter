@@ -8,6 +8,7 @@ import axios from "axios";
 import NavBar from "components/nav-bar";
 import ProgressBar from "@ramonak/react-progress-bar";
 import ReactRoundedImage from "react-rounded-image";
+import { useRouter } from "next/router";
 
 function ParticipantLookout(params) {
   return (
@@ -25,6 +26,176 @@ function ParticipantLookout(params) {
           <p className="px-2">Share app</p>
         </button>
       </div>
+    </Fragment>
+  );
+}
+
+function ParticipantComponent(item) {
+  const { match } = item;
+  const router = useRouter();
+
+  const AWAITING_ACKNOWLEDGEMENT = match.acknowledgedAt === null ? true : false;
+  const AWAITING_VACCINATION =
+    match.status === "PENDING_VACCINATION" &&
+    match.participant.Vaccination[0].progress === "REGISTERED"
+      ? true
+      : false;
+  const AWAITING_FUNDS =
+    match.participant.Vaccination[0].progress === "VACCINATED" ? true : false;
+  const FUNDS_RECEIVED =
+    match.paymentProof !== null && match.thankyouNote === null ? true : false;
+  const THANKYOU_RECEIVED =
+    match.paymentProof !== null && match.thankyouNote !== null ? true : false;
+
+  return (
+    <div
+      onClick={() => router.push(`/participant/${match.participantId}`)}
+      className="grid border-b border-gray-200 cursor-pointer hover:bg-gray-50 grid-cols-auto-two"
+    >
+      <div className="py-2">
+        <ReactRoundedImage
+          image={match.participant.selfie}
+          imageWidth="64"
+          imageHeight="64"
+          roundedSize="4"
+          roundedColor="#FFF"
+        />
+      </div>
+      <div className="w-full px-4 pt-2">
+        <div className="flex justify-between">
+          <h1 className="text-lg font-medium truncate">
+            {match.participant.name}
+          </h1>
+          <div className="flex">
+            {match.participant.Vaccination[0].dose === "FIRST" ? (
+              <Fragment>
+                <img src="/images/vaccine-ongoing-done.svg" />
+                <img src="/images/vaccine-pending.svg" />
+              </Fragment>
+            ) : (
+              <Fragment>
+                <img src="/images/vaccine-ongoing-done.svg" />
+                <img src="/images/vaccine-ongoing-done.svg" />
+              </Fragment>
+            )}
+          </div>
+        </div>
+        <h2 className="text-sm text-gray-600">
+          {AWAITING_ACKNOWLEDGEMENT ? (
+            <div className="flex">
+              <img
+                src="/images/awaiting-acknowledgement.svg"
+                className="pr-1"
+              />
+              Awaiting acknowledgement
+            </div>
+          ) : AWAITING_VACCINATION ? (
+            <div className="flex">
+              <img src="/images/awaiting-vaccination.svg" className="pr-1" />
+              Awaiting participant's vaccination
+            </div>
+          ) : AWAITING_FUNDS ? (
+            <div className="flex">
+              <img src="/images/send-funds.svg" className="pr-1" />
+              Send funds
+            </div>
+          ) : FUNDS_RECEIVED ? (
+            <div className="flex">
+              <img src="/images/send-funds.svg" className="pr-1" />
+              Funds sent successfully
+            </div>
+          ) : THANKYOU_RECEIVED ? (
+            <div className="flex">
+              <img src="/images/loop-complete.svg" className="pr-1" />
+              Received message
+            </div>
+          ) : (
+            "Status unknown"
+          )}
+        </h2>
+        <div className="flex pt-2">
+          <Fragment>
+            <div className="w-1/3 pr-2">
+              <ProgressBar
+                completed={AWAITING_ACKNOWLEDGEMENT ? 0 : 100}
+                bgColor="#6666FF"
+                baseBgColor="#E7E7E9"
+                height="4px"
+                isLabelVisible={false}
+              />
+            </div>
+            <div className="w-1/3 pr-2">
+              <ProgressBar
+                completed={AWAITING_VACCINATION ? 0 : 100}
+                bgColor="#6666FF"
+                baseBgColor="#E7E7E9"
+                height="4px"
+                isLabelVisible={false}
+              />
+            </div>
+            <div className="w-1/3">
+              <ProgressBar
+                completed={FUNDS_RECEIVED && THANKYOU_RECEIVED ? 100 : 0}
+                bgColor="#6666FF"
+                baseBgColor="#E7E7E9"
+                height="4px"
+                isLabelVisible={false}
+              />
+            </div>
+          </Fragment>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ActiveParticipants({ match }) {
+  const activeParticipantList = [];
+  const revokedParticipantList = [];
+  const completedParticipantList = [];
+
+  const matchThis = match?.forEach((item, index) => {
+    !item.matchRevoked
+      ? activeParticipantList.push(
+          <ParticipantComponent match={item} key={index} />
+        )
+      : item.thankyouNote
+      ? completedParticipantList.push(
+          <ParticipantComponent match={item} key={index} />
+        )
+      : revokedParticipantList.push(
+          <ParticipantComponent match={item} key={index} />
+        );
+  });
+
+  return (
+    <Fragment>
+      {activeParticipantList.length !== 0 ? (
+        <Fragment>
+          <div className="p-4 pt-0 font-medium text-gray-700">
+            Active Participants
+          </div>
+          <div className="px-4 bg-white rounded-md">
+            {activeParticipantList}
+          </div>
+        </Fragment>
+      ) : null}
+      {completedParticipantList.length !== 0 ? (
+        <Fragment>
+          <div className="p-4 font-medium text-gray-700">Archive</div>
+          <div className="px-4 bg-white rounded-md">
+            {completedParticipantList}
+          </div>
+        </Fragment>
+      ) : null}
+      {revokedParticipantList.length !== 0 ? (
+        <Fragment>
+          <div className="p-4 font-medium text-gray-700">Revoked</div>
+          <div className="px-4 bg-white rounded-md">
+            {revokedParticipantList}
+          </div>
+        </Fragment>
+      ) : null}
     </Fragment>
   );
 }
@@ -83,7 +254,11 @@ export default function Home(params) {
           </div>
         </div>
         {/* empty state */}
-        <ParticipantLookout />
+        {supporter?.Match.length != 0 ? (
+          <ActiveParticipants match={supporter?.Match} />
+        ) : (
+          <ParticipantLookout />
+        )}
         <NavBar currentTab="home" />
       </div>
     </Fragment>
